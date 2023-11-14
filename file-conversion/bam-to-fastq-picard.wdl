@@ -28,7 +28,11 @@
 workflow BamToFastq {
   input {
     File input_bam
-
+		String sample_name
+		String participant_id
+		String platform_unit
+		String platform_name = "illumina"
+		String genome_name = "hg38"
     Int additional_disk_size = 20
     String gatk_docker = "broadinstitute/gatk:latest"
     String gatk_path = "/gatk/gatk"
@@ -44,8 +48,17 @@ workflow BamToFastq {
   }
 	call WriteReadGroup { 
 		input:
-		# @TODO To be completed	
-	
+			readgroup = sample_name,
+			fastq1 = SamToFastq.fastq1,
+			fastq2 = SamToFastq.fastq2,
+			sample_name = participant_id,
+			library_name = genome_name,
+			platform_unit = platform_unit,
+			run_date = run_date,
+			platform_name = platform_name,
+			sequencing_center = sequencing_center,
+      disk_size = ceil(input_size * 3) + additional_disk_size,
+      docker = gatk_docker
 	}
 
   output {
@@ -89,4 +102,57 @@ task SamToFastq {
     File fastq2 = "~{fastq2}"
   }
 }
+
+
+task SamToFastq {
+  input {
+    #Command parameters
+		String readgroup
+		String fastq1
+		String fastq2
+		String sample_name
+		String library_name
+		String platform_unit 
+		String run_date
+		String platform_name 
+		String sequencing_center
+
+    #Runtime parameters
+    Int disk_size
+    String docker
+    Int machine_mem_gb = 2
+    Int preemptible_attempts = 3
+  }
+    Int command_mem_gb = machine_mem_gb - 1    ####Needs to occur after machine_mem_gb is set 
+
+  command {
+		python  <<CODE
+		import pandas as pd
+		d = {
+			readgroup: '${readgroup}',
+			fastq1: '${fastq1}',
+			fastq2: '${fastq2}',
+			sample_name: '${sample_name}',
+			library_name: '${library_name}',
+			platform_unit: '${platform_unit}',
+			run_date: '${run_date}',
+			platform_name: '${platform_name}',
+			sequencing_center: '${sequencing_center}'
+		}
+		df = pd.DataFrame(d)
+		df.to_csv('${readgroup}.txt',index=False,sep='\t')
+		CODE
+ 
+  }
+  runtime {
+    docker: docker
+    disks: "local-disk " + disk_size + " HDD"
+    memory: machine_mem_gb + " GB"
+    preemptible: preemptible_attempts
+  }
+  output {
+    File readgroup_file = "~{sample_name}_readgroup.txt"
+  }
+}
+
 
