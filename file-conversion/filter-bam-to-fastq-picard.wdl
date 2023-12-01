@@ -33,6 +33,7 @@ workflow BamToFastq {
     String participant_id
     String platform_unit
     String run_date
+		String bam_filter
     String platform_name = "illumina"
     String genome_name = "hg38"
     String sequencing_center
@@ -42,9 +43,17 @@ workflow BamToFastq {
   }
   Float input_size = size(input_bam, "GB")
   String bam_basename = basename(input_bam) 
+	call FilterSamReads{
+		input_bam = input_bam,
+		bam_basename = bam_basename,
+		bam_filter = bam_filter,
+		disk_size = ceil(input_size * 3) + additional_disk_size,
+		docker = gatk_docker,
+		gatk_path = gatk_path
+	}
   call SamToFastq {
     input:
-      input_bam = input_bam,
+      input_bam = FilterSamReads.output_bam,
       bam_basename = bam_basename,
       disk_size = ceil(input_size * 3) + additional_disk_size,
       docker = gatk_docker,
@@ -72,6 +81,39 @@ workflow BamToFastq {
   }
 }
 
+task FilterSamReads {
+	input{
+		File input_bam 
+		String bam_basename 
+		String bam_filter
+    
+    #Runtime parameters
+		Int disk_size 
+		String docker
+		String gatk_path
+    Int machine_mem_gb = 2
+    Int preemptible_attempts = 3
+	}
+	command{
+		~{gatk_path} --java-options "-Xmx~{command_mem_gb}g" \
+		FilterSamReads \
+		I=~{input_bam}
+		O=filtered_~{bam_basename}\
+		FILTER=~{bam_filter}
+	}
+
+  runtime {
+    docker: docker
+    disks: "local-disk " + disk_size + " HDD"
+    memory: machine_mem_gb + " GB"
+    preemptible: preemptible_attempts
+  }
+
+  output {
+    File output_bam = "filtered_~{bam_basename}"
+  }
+}
+
 task SamToFastq {
   input {
     #Command parameters
@@ -92,8 +134,7 @@ task SamToFastq {
     SamToFastq \
     I=~{input_bam} \
     F=~{bam_basename}_1.fastq \
-    F2=~{bam_basename}_2.fastq \
-		--VALIDATION_STRINGENCY SILENT
+    F2=~{bam_basename}_2.fastq
   }
   runtime {
     docker: docker
