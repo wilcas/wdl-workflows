@@ -1,5 +1,6 @@
 version 1.0
-## This WDL converts SRAlite files into paired fastq files
+## This WDL downloads SRA files from the NIH using sratools prefetch
+## and converts them into paired fastq files using fasterq-dump
 ##
 ## Requirements/expectations :
 ## - sralite file
