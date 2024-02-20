@@ -78,8 +78,8 @@ task fixFastq {
     >>>
   
     output {
-      File fastq1_paired = "${sample_id}_1.fastq.paired.fq"
-      File fastq2_paired = "${sample_id}_2.fastq.paired.fq"
+      File fastq1_paired = "~{sample_id}_1.fastq.paired.fq"
+      File fastq2_paired = "~{sample_id}_2.fastq.paired.fq"
     }
 
   runtime {
