@@ -95,7 +95,8 @@ task compress {
     # Command parameters
     File fastq1
     File fastq2
-
+    String fastq1_base = basename(fastq1)
+    String fastq2_base = basename(fastq2)
     # Runtime parameters
     String ncbi_docker 
     Int n_threads 
@@ -106,14 +107,16 @@ task compress {
     command <<< 
       pigz ~{fastq1}
       pigz ~{fastq2}
+      mv ~{fastq1}.gz ~{fastq1_base}.gz
+      mv ~{fastq2}.gz ~{fastq2_base}.gz
     >>>
   
     output {
-      File fastq1_gz = "~{fastq1}.gz"
-      File fastq2_gz = "~{fastq2}.gz"
+      File fastq1_gz = "~{fastq1_base}.gz"
+      File fastq2_gz = "~{fastq2_base}.gz"
     }
 
-  runtime {
+    runtime {
       docker: ncbi_docker
       cpu: n_threads
       memory: memory
