@@ -61,7 +61,7 @@ task fastqDump {
 
     command <<< 
     prefetch -T ~{sratype} ~{SRRaccession} --ngc ~{ngcfile}
-    fasterq-dump --split-files ~{SRRaccession}
+    fasterq-dump ~{SRRaccession}
     pigz ~{SRRaccession}_1.fastq
     pigz ~{SRRaccession}_2.fastq
     >>>
