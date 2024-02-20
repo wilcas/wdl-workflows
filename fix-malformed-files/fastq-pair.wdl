@@ -74,7 +74,7 @@ task fixFastq {
     command <<< 
       gunzip -c ~{fastq1} > "~{sample_id}"_1.fastq
       gunzip -c ~{fastq2} > "~{sample_id}"_2.fastq
-      fastq_pair "~{sample_id}"_1.fastq "~{sample_id}"_1.fastq
+      fastq_pair -s "~{sample_id}"_1.fastq "~{sample_id}"_1.fastq
     >>>
   
     output {
