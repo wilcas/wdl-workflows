@@ -42,7 +42,7 @@ RUN pip3 -V \
 
 RUN pip3 install --upgrade markupsafe==2.1.2
 
-RUN apt-get install -y cpanminus \
+RUN apt-get install -yq --no-install-recommends\
   build-essential\
   curl \
   zip \
@@ -50,15 +50,16 @@ RUN apt-get install -y cpanminus \
   libbz2-dev \
   liblzma-dev \
   zlib1g-dev \
-  libssl-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 RUN pip3 install hail
 RUN cpan install Archive::Zip DBI 
 ENV NO_NETWORK_TESTING=True
 RUN cpan install LWP::Simple
+
 RUN curl -L -O https://github.com/Ensembl/ensembl-vep/archive/release/111.zip && unzip 111.zip && rm 111.zip
-RUN cd ensembl-vep-release-111/; echo "no" | perl INSTALL.pl --NO_HTSLIB
+RUN cd ensembl-vep-release-111/; echo "no" | perl INSTALL.pl 
+
 ENV USER jupyter
 USER $USER
 # We want pip to install into the user's dir when the notebook is running.
