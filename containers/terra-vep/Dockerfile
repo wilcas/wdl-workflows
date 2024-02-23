@@ -59,7 +59,7 @@ RUN cpan install LWP::Simple
 
 RUN curl -L -O https://github.com/Ensembl/ensembl-vep/archive/release/111.zip && unzip 111.zip && rm 111.zip
 RUN cd ensembl-vep-release-111/; echo "no" | perl INSTALL.pl 
-
+RUN cpan install JSON
 ENV USER jupyter
 USER $USER
 # We want pip to install into the user's dir when the notebook is running.
