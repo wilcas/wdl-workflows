@@ -1,6 +1,6 @@
 {
     "command": [
-        "vep",
+        "/usr/local/bin/.vep/vep",
         "--format", "vcf",
         "__OUTPUT_FORMAT_FLAG__",
         "--allele_number",
