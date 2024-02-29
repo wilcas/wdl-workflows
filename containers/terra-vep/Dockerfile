@@ -53,13 +53,16 @@ RUN apt-get install -yq --no-install-recommends\
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 RUN pip3 install hail
-RUN cpan install Archive::Zip DBI 
-ENV NO_NETWORK_TESTING=True
-RUN cpan install LWP::Simple
 
+ENV NO_NETWORK_TESTING=True
+RUN cpan install Archive::Zip DBI JSON LWP::Simple
 RUN curl -L -O https://github.com/Ensembl/ensembl-vep/archive/release/111.zip && unzip 111.zip && rm 111.zip
-RUN cd ensembl-vep-release-111/; echo "no" | perl INSTALL.pl 
-RUN cpan install JSON
+RUN cd ensembl-vep-release-111/; echo "no" | perl INSTALL.pl\
+  && mkdir /usr/local/bin/.vep\
+  && cd .. \
+  && cp -r ensembl-vep-release-111/* /usr/local/bin/.vep/ \
+  && rm -r ensembl-vep-release-111
+ENV PATH="$PATH:/usr/local/bin/.vep"
 ENV USER jupyter
 USER $USER
 # We want pip to install into the user's dir when the notebook is running.
