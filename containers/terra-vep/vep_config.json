@@ -4,6 +4,7 @@
         "--format", "vcf",
         "__OUTPUT_FORMAT_FLAG__",
         "--allele_number",
+	"--pick",
         "--force_overwrite",
         "--minimal",
         "--sift","b", "--polyphen", "b", "--ccds", "--symbol",
